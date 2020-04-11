@@ -1,0 +1,10 @@
+# playmusic
+
+#!/bin/sh
+
+song="/media/UNRAVEL.mp3"
+mpg123 "$song"
+killall -KILL mpg123
+
+
+
