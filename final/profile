@@ -1,0 +1,30 @@
+export PATH="/bin:/sbin:/usr/bin:/usr/sbin"
+
+if [ "$PS1" ]; then
+        if [ "`id -u`" -eq 0 ]; then
+                export PS1='MP3_Shell>'
+        else
+                export PS1='$ '
+        fi
+fi
+
+export EDITOR='/bin/vi'
+
+# Source configuration files from /etc/profile.d
+for i in /etc/profile.d/*.sh ; do
+        if [ -r "$i" ]; then
+                . $i
+        fi
+done
+unset i
+
+echo "Welcome to BuildRoot MP3 Player"
+
+../usr/bin/playmusic-daemon &         
+#echo 0 > /songsFile/cmdState         
+                                      
+alias play="echo 1 > '/songsFile/cmdState'"
+alias pause="echo 2 > '/songsFile/cmdState'"
+alias next="echo 3 > '/songsFile/cmdState'" 
+alias previous="echo 4 > '/songsFile/cmdState'"
+alias shuffle="echo 5 > '/songsFile/cmdState'" 

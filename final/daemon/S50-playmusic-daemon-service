@@ -21,11 +21,7 @@ startdaemon2(){
   start-stop-daemon -b --start --quiet --exec ${DAEMON2}
 }
 
-stopdaemon2(){
-  start-stop-daemon --stop --quiet --exec ${DAEMON2}
-}
-
-/usr/bin/Bluetooth
-startdaemon2
-startdaemon1
-
+stopdaemon2(){                                                         
+  start-stop-daemon --stop --quiet --exec ${DAEMON2}    
+}                                                   
+startdaemon1  
