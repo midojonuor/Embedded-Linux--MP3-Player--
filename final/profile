@@ -1,3 +1,4 @@
+
 export PATH="/bin:/sbin:/usr/bin:/usr/sbin"
 
 if [ "$PS1" ]; then
@@ -20,8 +21,9 @@ unset i
 
 echo "Welcome to BuildRoot MP3 Player"
 
-../usr/bin/playmusic-daemon &         
-#echo 0 > /songsFile/cmdState         
+../usr/bin/playmusic-daemon &       
+#../usr/bin/DetectUSB &  
+echo 0 > /songsFile/cmdState         
                                       
 alias play="echo 1 > '/songsFile/cmdState'"
 alias pause="echo 2 > '/songsFile/cmdState'"

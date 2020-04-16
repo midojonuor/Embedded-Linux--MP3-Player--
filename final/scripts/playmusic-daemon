@@ -2,30 +2,20 @@
 set -e
 
 PLAYER="/media"
-songs="/songsFile/Songs_NamesFile"
-usbFlag="/songsFile/USBDetectFlag_File.conf"
-stateFlag="/songsFile/cmdState"
+songs="/songsFile/SongsList"
+CommandLine="/songsFile/cmdState"
 SongNumber="/songsFile/SongNumberFile"
 playState="/songsFile/playStateFile" 
+SongCounter="/songsFile/SongCounterFile"
+
 
 test -d ${PLAYER} || exit 1
 
 mkdir -p /songsFile
 
-# Remove file if exist
-if [ -f  $songs ] ; then
-    rm $songs
-fi
 
 
-
-if [ ! -e /songsFile/cmdState ]
-then
- touch /songsFile/cmdState
- chmod 777 /songsFile/cmdState
-fi
-
-if [ ! -e /songsFile/cmdState ]                                                 
+if [ ! -e $playState ]                                                 
 then                                                                            
  touch $playState                                                    
  chmod 777 $playState                                                
@@ -40,39 +30,27 @@ then
 fi  
 
 
-if [ ! -f $stateFlag ] ; then
-   touch $stateFlag
-   chmod 777 $stateFlag
-   echo 0 > stateFlag
+if [ ! -e $CommandLine ] ; then
+   touch $CommandLine
+   chmod 777 $CommandLine
+   echo 0 > $CommandLine
 fi
-CommandLine=$stateFlag                      
+   echo 0 > $CommandLine          
+
                                             
-                                            
+ 
                                             
 functionToSetArrayOfMusic(){                
-                               
-song_counter=0               
+                                          
 Song_Number=1                
 Min_NumberOfSong=1           
 button_state=0               
 FirstTimeFlag=0              
 PlayingFlag=0           
                              
-                             
-# find the songs in media folder
-find $PLAYER -iname "*mp3" | while read song
-do                                          
-          echo "$song">> $songs             
-                                            
-done                                        
-song_counter=$( wc -l < $songs )  
-echo $Min_NumberOfSong > $SongNumber          
+                                                                        
 }                         
-functionToSetArrayOfMusic                   
-if [ ! -f  $usbFlag ] ; then                
-    echo "DetectUSBFlag=0" > $usbFlag       
-    chmod 777 $usbFlag                      
-fi                                          
+functionToSetArrayOfMusic                                                       
                                             
                                             
 if [ ! -d /sys/class/gpio/gpio4 ] ; then # check if export process has done befo
@@ -105,14 +83,8 @@ fi
 while true                                                                      
 do                                                                              
                                                                                 
-  # read the file content                                                       
-  source $usbFlag                                                               
-  if [[  $DetectUSBFlag -eq 1  ]] ; then                                        
-    echo "USB Detected"                                                         
-    echo "Begain to load the songs from it"                                     
-    functionToSetArrayOfMusic                                                   
-    echo "DetectUSBFlag=0" > $usbFlag                                           
-  fi                                                                            
+   song_counter=$( cat $SongCounter )
+                                                                          
    if [[ $( cat $CommandLine ) ==  '1' ]] ; then  #play                          
         if [ $song_counter -eq 0 ] ; then
            echo "No .MP3 files found"
@@ -130,11 +102,12 @@ do
             else
               mpg123 -q ${music} &
               sleep 0.4
-            fi
-            echo 0 > $CommandLine                                                                                                            
-         fi                                               
+            fi                                                                                                            
+         fi   
+         echo 0 > $CommandLine                                            
                                                                           
  elif [[ $( cat $CommandLine ) ==  '2' ]] ; then  # 'pause'                      
+        
         if [ $song_counter -eq 0 ] ; then                                             
            echo "No .MP3 files found"   
            sleep 0.4                                        
@@ -144,10 +117,10 @@ do
            echo "MP3 Paused > [$(basename ${music})]"                             
            sleep 0.4
            killall -STOP  mpg123 2> /dev/null                                                                                                          
-           echo 0 > $CommandLine
            echo 1 > $playState
                                                              
-        fi                                                    
+        fi      
+        echo 0 > $CommandLine                                              
                                                                               
  elif [[ $( cat $CommandLine ) ==  '3' ]] ; then  # next                         
         if [ $song_counter -eq 0 ] ; then                                             
@@ -168,8 +141,9 @@ do
            music=$( awk 'NR==n' n=$Song_Number $songs )                          
            echo "MP3 Playing > [$(basename ${music})]"                           
            mpg123 -q ${music} &                                                  
-           echo 0 > $CommandLine                                                                                                                                                  
-        fi                                                                        
+                                                                                                                                             
+        fi  
+        echo 0 > $CommandLine                                                                      
        
   elif [[ $( cat $CommandLine ) ==  '4' ]] ; then  # previous                     
        if [ $song_counter -eq 0 ] ; then                                              
@@ -190,8 +164,9 @@ do
            music=$( awk 'NR==n' n=$Song_Number $songs )                        
            echo "MP3 Playing > [$(basename ${music})]"                         
            mpg123 -q ${music} &                                                
-           echo 0 > $CommandLine                                                                        
-       fi                                                                      
+                                                                                 
+       fi
+       echo 0 > $CommandLine                                                                      
                                                                                 
   elif [[ $( cat $CommandLine ) ==  '5' ]] ; then  # shuffle                      
        if [ $song_counter -eq 0 ] ; then                                              
@@ -209,8 +184,9 @@ do
             music=$( awk 'NR==n' n=$Song_Number $songs )                        
             echo "MP3 Playing > [$(basename ${music})]"                         
             mpg123 -q ${music} &  
-            echo 0 > $CommandLine                                                                                           
-      fi                                                                        
+                                                                                        
+      fi                          
+      echo 0 > $CommandLine                                              
                                                                                 
                                                                                 
    elif [ $(cat /sys/class/gpio/gpio4/value) == '1' ] ; then #if anyone pus       
@@ -238,6 +214,7 @@ do
             elif [ $button_state -eq 1 ]                                        
               then                                                              
               echo "MP3 Puased > [$(basename ${music})]"                        
+
               killall -STOP  mpg123 &                                           
               PlayingFlag=0                                                     
               button_state=0                                                    
@@ -310,6 +287,4 @@ do
         fi                                                                
   fi                                                                              
 done                                                                            
-                                                                                
-       
-
+          

@@ -1,0 +1,77 @@
+#!/bin/sh
+oldDevices="/newFiles"
+newDevices="/newFiles2"
+songList="/songs.txt"
+mountDirectory="/media"
+PLAYER="/media"
+songs="/songsFile/SongsList"
+USBFlag="/songsFile/USBDetect"
+SongCounter="/songsFile/SongCounterFile"
+
+if [ ! -f "$songs" ]; then
+        touch $songs
+        chmod 777 $songs
+fi
+
+                          
+                          
+if [ ! -f "$SongCounter" ]; then
+        touch $SongCounter 
+        chmod 777 $SongCounter  
+fi                          
+   
+
+if [ ! -f "$USBFlag" ]; then
+        touch $USBFlag     
+        echo "1" > $USBFlag
+fi   
+
+if [ ! -f "$oldDevices" ]; then
+	touch $oldDevices
+	echo "0" > $oldDevices 
+fi
+
+
+search=$(find /dev/sd*) 2>/dev/null
+if  [ ! -z "$search"  ] ; then 
+		echo $search | tr " " "\n"> $oldDevices
+fi
+
+while true; do
+	sleep 1
+	#search2=$(find /dev/sd*)
+        search2="$(fdisk -l /dev/sd* | grep -v 'Unknown' | grep -v 'Empty' | awk '/\/dev\/sd/ {print $2}' | sed 's/.$//' | grep '/dev')" 2>/dev/null
+	echo $search2 | tr " " "\n"> $newDevices
+	if cmp -s $oldDevices $newDevices ; then
+         	echo 'The file "%s" is the same as "%s"\n' "$file1" "$file2" > /dev/null
+	else
+    	        cp  $newDevices $oldDevices                                                    
+                echo "1" > $USBFlag                                       
+
+	fi
+	
+
+     if [[ $( cat $USBFlag ) == '1' ]] ; then                                   
+      
+        while read p; do
+		#if grep -qs $p /proc/mounts; then
+		#    echo "$p is mounted." > /dev/null
+	       #	else
+		   
+		    tempV=$(expr substr ${p} 5 10) 2>/dev/null
+		    #echo $tempV
+		    mkdir -p $mountDirectory/"$tempV" 2>/dev/null 
+	            mount $p $mountDirectory/"$tempV" 2>/dev/null  
+			    
+	#	fi
+	done < $oldDevices                  
+         rm $songs
+         touch $songs
+         find $PLAYER -iname "*mp3" | while read song
+         do                                          
+            echo "$song">> $songs             
+         done
+         echo $( wc -l < $songs ) > $SongCounter
+         echo 0 > $USBFlag  
+      fi
+done
