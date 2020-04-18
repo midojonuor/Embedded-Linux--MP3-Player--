@@ -9,14 +9,14 @@ iface eth0 inet static
 	pre-up /etc/network/nfs_check
 	wait-delay 15
 	hostname $(hostname)
-	address 192.168.1.6
+	address 192.168.1.26
 	netmask 255.255.255.0
 
 
 auto wlan0
 iface eth0 inet dhcp
 #iface wlan0 inet static
-	address 192.168.1.201
+	address 192.168.1.25
         netmask 255.255.255.0
         pre-up wpa_supplicant -B -Dwext -iwlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf
         post-down killall -q wpa_supplicant
