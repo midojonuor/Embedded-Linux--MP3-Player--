@@ -4,9 +4,11 @@ PATH=/sbin:/bin:/usr/bin
 
 DAEMON1="/usr/bin/playmusic-daemon"
 DAEMON2="/usr/bin/DetectUSB"
+DAEMON3="/usr/bin/startBluetooth"
 
 test -f ${DAEMON1} || exit 0
 test -f ${DAEMON2} || exit 0
+test -f ${DAEMON3} || exit 0
 
 startdaemon1(){
   modprobe snd-bcm2835 #This will wire up the sound card with alsa
@@ -16,6 +18,7 @@ startdaemon1(){
 stopdaemon1(){
   start-stop-daemon --stop --quiet --exec ${DAEMON1}
 }
+
 startdaemon2(){
   sudo modprobe snd-bcm2835 #This will wire up the sound card with alsa
   start-stop-daemon -b --start --quiet --exec ${DAEMON2}
@@ -25,6 +28,16 @@ stopdaemon2(){
   start-stop-daemon --stop --quiet --exec ${DAEMON2}
 }
 
+startdaemon3(){
+  modprobe snd-bcm2835 #This will wire up the sound card with alsa
+  start-stop-daemon -b --start --quiet --exec ${DAEMON3}
+}
+
+stopdaemon3(){
+  start-stop-daemon --stop --quiet --exec ${DAEMON3}
+}
+
 startdaemon2                                        
 startdaemon1
+startdaemon3
 

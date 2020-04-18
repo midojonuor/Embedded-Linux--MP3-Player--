@@ -6,8 +6,19 @@ iface lo inet loopback
 auto eth0
 #iface eth0 inet dhcp
 iface eth0 inet static
-  pre-up /etc/network/nfs_check
-  wait-delay 15
-  hostname $(hostname)
-  address 192.168.1.6
-  netmask 255.255.255.0
+	pre-up /etc/network/nfs_check
+	wait-delay 15
+	hostname $(hostname)
+	address 192.168.1.6
+	netmask 255.255.255.0
+
+
+auto wlan0
+iface eth0 inet dhcp
+#iface wlan0 inet static
+	address 192.168.1.201
+        netmask 255.255.255.0
+        pre-up wpa_supplicant -B -Dwext -iwlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf
+        post-down killall -q wpa_supplicant
+        wait-delay 15
+iface default inet dhcp
